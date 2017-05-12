@@ -542,7 +542,7 @@ class LanboxMethods():
                                     if payload.lower()[:3] == 'all': returnlist[position] = '80'
                                     if payload.lower()[:5] == 'every': returnlist[position] = '80'
                                 else:
-                                    retlist[position]= hex(element)[2:].zfill(2)
+                                    returnlist[position]= hex(element)[2:].zfill(2)
                     return ''.join(returnlist)
                 else: pass
         ret = {}
