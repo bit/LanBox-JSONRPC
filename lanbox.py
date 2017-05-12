@@ -912,6 +912,7 @@ class LanboxMethods():
         return self._lanbox(commandDict['CommonSetMIDIBeat'])
     def commonGetPatcher (self, dmxChan=1, num=255):
         '''Return the DMX Patch table.'''
+        ret = {}
         response = self._lanbox(commandDict['CommonGetPatcher']+self._to_hex(dmxChan,4)+self._to_hex(num,2))
         for n,c in enumerate(self._chunk(response,4)):
             ret[dmxChan+n]=self._from_hex(c)
