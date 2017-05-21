@@ -8,7 +8,8 @@ Python Interface for LanBox controllers
  port = 777
  password = '777'
  box = lanbox.Lanbox(host, port, password)
- box.runCueList(1)
+
+ box.layerGo(1)
 
  channels = box.getChannels()
  duration = 10.2  # seconds
