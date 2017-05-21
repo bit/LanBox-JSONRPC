@@ -1,10 +1,14 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import socket
-import ConfigParser
+import six.moves.configparser
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor, defer
 import json
 import os
+import six
+from six.moves import range
 
 commandDict = {
     'CommonGetAppID': '00050000',
@@ -111,7 +115,7 @@ commandDict = {
     'DebugGetCuelistUsage': 'DF'
 }
 
-c = ConfigParser.ConfigParser()
+c = six.moves.configparser.ConfigParser()
 c.read('/opt/LanBox-JSONRPC/config.ini')
 LIGHTSERVER = (c.get('LanBox', 'name'), c.getint('LanBox', 'port'))
 PASSWORD = c.get('LanBox', 'password')
@@ -228,7 +232,7 @@ class LanboxMethods():
 
     def _to_hex(self, n, length=2):
         '''Convert int to hex string of set length.'''
-        if isinstance(n, basestring):
+        if isinstance(n, six.string_types):
             try:
                 n = int(n)
             except:
@@ -250,7 +254,7 @@ class LanboxMethods():
 
     def _from_hex(self, n):
         '''Convert hex string to int. Not designed to return bools.'''
-        if not isinstance(n, basestring):
+        if not isinstance(n, six.string_types):
             raise ValueError  # Probably a typo!
         return int(n, 16)
 
@@ -275,7 +279,7 @@ class LanboxMethods():
                 if rT1[response] == model:
                     r = response
             return r
-        return T1.keys()
+        return list(T1.keys())
 
     def showModels(self):
         '''Show a list of LanBox model names.'''
@@ -333,7 +337,7 @@ class LanboxMethods():
                 if s.lower() in rT3:
                     ret[3-rT3[s.lower()]] = '1'
             return ret
-        return rT3.keys()
+        return list(rT3.keys())
 
     def showChannelStatusList(self):
         '''Show a list of valid channel status names.'''
@@ -368,7 +372,7 @@ class LanboxMethods():
                 if f.lower() in rT4:
                     ret[7-rT4[f.lower()]] = '1'
             return ret
-        return rT4.keys()
+        return list(rT4.keys())
 
     def showLayerAttributeList(self):
         '''Show a list of valid layer attribute names.'''
@@ -396,7 +400,7 @@ class LanboxMethods():
             if mode.lower() in rT5:
                 ret = rT5[mode.lower()].zfill(2)
             return ret
-        return rT5.keys()
+        return list(rT5.keys())
 
     def showLayerMixModeList(self):
         '''Show a list of valid layer mix modes.'''
@@ -429,7 +433,7 @@ class LanboxMethods():
             if mode.lower() in rT6:
                 ret = rT6[mode.lower()].zfill(2)
             return ret
-        return rT6.keys()
+        return list(rT6.keys())
 
     def showLayerChaseModeList(self):
         '''Show a list of valid layer chase modes.'''
@@ -461,7 +465,7 @@ class LanboxMethods():
             if mode.lower() in rT7:
                 ret = rT7[mode.lower()].zfill(2)
             return ret
-        return rT7.keys()
+        return list(rT7.keys())
 
     def showLayerFadeModeList(self):
         '''Show a list of valid layer fade modes.'''
@@ -491,7 +495,7 @@ class LanboxMethods():
             if str(speed) in rT8:
                 ret = rT8[speed].zfill(2)
             return ret
-        return rT8.keys()
+        return list(rT8.keys())
 
     def showBaudRateList(self):
         '''Show a list of valid LanBox baud rates.'''
@@ -524,7 +528,7 @@ class LanboxMethods():
                 if f.lower() in rT9:
                     ret[7-rT9[f.lower()]] = '1'
             return ret
-        return rT9.keys()
+        return list(rT9.keys())
 
     def showUDPOutputList(self):
         '''Show a list of valid LanBox UDP output modes.'''
@@ -773,7 +777,7 @@ class LanboxMethods():
             names = stepdata[type]
             n = names['name']
             del names['name']
-            ret[n] = names.values()
+            ret[n] = list(names.values())
         return ret
 
     def showStepDataList(self):
@@ -792,7 +796,7 @@ class LanboxMethods():
                 slights[str(light)] = 255
             else:
                 slights[str(light)] = lights[light]
-        blocks = self._chunk(slights.keys(), 255)  # Only set 255 at a time.
+        blocks = self._chunk(list(slights.keys()), 255)  # Only set 255 at a time.
         for block in blocks:
             setting = {b: slights[b] for b in block}
             self.channelSetData(setting, layer)
@@ -1496,7 +1500,7 @@ class LanboxMethods():
 
     def getScenes(self):
         '''Return the list of all light scenes from the middleware.'''
-        return self.scene.scenes.keys()
+        return list(self.scene.scenes.keys())
 
     def showScene(self, sceneName, lights={}, layer=1):
         '''Output this named light list. Can be modified with a list of lights to filter. Returns lights changed.'''

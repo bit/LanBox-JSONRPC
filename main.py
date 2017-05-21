@@ -1,14 +1,18 @@
 #!/usr/bin/python
+from __future__ import absolute_import
+from __future__ import print_function
 from twisted.internet.protocol import Protocol, Factory
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
 import json
 import inspect
-import ConfigParser
+import six.moves.configparser
 
 import lanbox
+import six
+from six.moves import range
 
-c = ConfigParser.ConfigParser()
+c = six.moves.configparser.ConfigParser()
 c.read('/opt/LanBox-JSONRPC/config.ini')
 PORT = c.getint('JSONRPC', 'port')
 
@@ -35,7 +39,7 @@ class Methods():
             fname = 'vars'
         if fname in self.methods:
             i = inspect.getargspec(self.methods[fname]['function'])
-            keys = self.methods[fname].keys()
+            keys = list(self.methods[fname].keys())
             keys.remove('function')
             ret = {k: self.methods[fname][k] for k in keys}
             ret['name'] = fname
@@ -45,7 +49,7 @@ class Methods():
 
     def list(self):
         '''Returns a list of all function names listed.'''
-        return self.methods.keys()
+        return list(self.methods.keys())
 
     def add(self, function, name=None):
         '''Adds new methods to the listing.'''
@@ -113,7 +117,7 @@ class JSONRPC(LineReceiver):
         except:
             return self.json_error(-32600)
 
-        if not isinstance(call['method'], basestring):
+        if not isinstance(call['method'], six.string_types):
             return self.json_error(-32600, id)
         meth = call['method']
         if 'params' in call:
