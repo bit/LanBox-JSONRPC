@@ -1,0 +1,6 @@
+MANIFEST
+build
+dist
+lanbox.egg-info
+__pycache__
+*.pyc
