@@ -2,9 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 import socket
 import six.moves.configparser
-from twisted.internet.protocol import Protocol, ReconnectingClientFactory
-from twisted.protocols.basic import LineReceiver
-from twisted.internet import reactor, defer
 import json
 import os
 import six
@@ -115,18 +112,16 @@ commandDict = {
     'DebugGetCuelistUsage': 'DF'
 }
 
-c = six.moves.configparser.ConfigParser()
-c.read('/opt/LanBox-JSONRPC/config.ini')
-LIGHTSERVER = (c.get('LanBox', 'name'), c.getint('LanBox', 'port'))
-PASSWORD = c.get('LanBox', 'password')
-
 class Scene():
     '''Functions to recover/record light patterns by name outside the LanBox.'''
-    def __init__(self):
-        self.config = '/opt/LanBox-JSONRPC/scenes.json'
-        try:
-            self.scenes = json.load(open(self.config, 'r'))
-        except:
+    def __init__(self, config=None):
+        self.config = config
+        if config:
+            try:
+                self.scenes = json.load(open(self.config, 'r'))
+            except:
+                self.scenes = {}
+        else:
             self.scenes = {}
 
     def get(self, scene):
@@ -137,53 +132,32 @@ class Scene():
 
     def set(self, scene, lights):
         self.scenes[scene.lower()] = lights
-        json.dump(self.scenes, open(self.config, 'w'), sort_keys=True, indent=4, separators=(',', ':'))
+        if self.config:
+            with open(self.config, 'w') as fd:
+                json.dump(self.scenes, fd, sort_keys=True, indent=4, separators=(',', ':'))
 
-class lanbox(Protocol):
-    '''Prototype async handler. Unfinished.'''
-    def __init__(self, methods):
-        self.methods = methods
-        self.methods._lanbox = self.sendLine
+class Lanbox():
+    '''
+        LanBox interface
 
-    def connectionMade(self):
-        self.transport.write(PASSWORD+'\n')
+        pass scene='/path/to/scenes.json' to store scenes
+    '''
 
-    @defer.inlineCallbacks
-    def sendLine(self, string):
-        self.transport.write(string+'\n')
-        defer.returnValue(self.dataReceived())
+    def __init__(self, host='192.168.1.77', port=777, password='777', scene=None):
+        self._server = (host, port)
+        self._password = password
 
-    def dataReceived(self, data):
-        data.strip('\n')
-        data.strip()
-        if data is '?':
-            return None
-        else:
-            return data
-
-class LanboxFactory(ReconnectingClientFactory):
-    '''Prototype async handler. Unfinished.'''
-    def __init__(self, methods):
-        self.host, self.port = LIGHTSERVER
-        self.methods = methods
-
-    def buildProtocol(self, addr):
-        return Lanbox(self.methods)
-
-class LanboxMethods():
-    '''Lanbox methods from the manual, plus a few friendly extensions..'''
-    def __init__(self):
-        self.scene = Scene()
+        self.scene = Scene(scene)
 
     def _connectToLB(self, s=None):
         '''Handler for connecting to the lanbox. Blocking.'''
         if s is None:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         data = ''
-        s.connect(LIGHTSERVER)
+        s.connect(self._server)
         data = s.recv(4096)
         while data != 'connected':
-            s.sendall(PASSWORD+'\n')
+            s.sendall(self._password+'\n')
             data = s.recv(4096)
         s.sendall('*6501#')  # 16 bit mode on
         data = s.recv(4096)
