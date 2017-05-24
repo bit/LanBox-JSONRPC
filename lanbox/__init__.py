@@ -1,7 +1,5 @@
 from __future__ import absolute_import, print_function
 
-import json
-import os
 import socket
 
 try:
@@ -123,7 +121,6 @@ class Lanbox():
     def __init__(self, host='192.168.1.77', port=777, password='777'):
         self._server = (host, port)
         self._password = password
-
 
     def _connectToLB(self, s=None):
         '''Handler for connecting to the lanbox. Blocking.'''
