@@ -1,6 +1,9 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import
 
 import socket
+
+import logging
+logger = logging.getLogger(__name__)
 
 try:
     string_types = (basestring,)
@@ -142,10 +145,10 @@ class Lanbox():
         if s is None:
             closeafter = True
             s = self._connectToLB()
-        print('*'+command+'#')
+        logger.debug('*'+command+'#')
         s.sendall('*'+command+'#')
         ret = s.recv(4096)
-        print(ret)
+        logger.debug(ret)
         if ret != '?':
             ret = ret[1:-2]
         if closeafter:
