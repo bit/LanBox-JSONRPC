@@ -132,10 +132,10 @@ class Lanbox():
         data = ''
         s.connect(self._server)
         data = s.recv(4096)
-        while data != 'connected':
-            s.sendall(self._password+'\n')
+        while data != b'connected':
+            s.sendall((self._password+'\n').encode('utf-8'))
             data = s.recv(4096)
-        s.sendall('*6501#')  # 16 bit mode on
+        s.sendall(b'*6501#')  # 16 bit mode on
         data = s.recv(4096)
         return s
 
@@ -146,8 +146,8 @@ class Lanbox():
             closeafter = True
             s = self._connectToLB()
         logger.debug('*'+command+'#')
-        s.sendall('*'+command+'#')
-        ret = s.recv(4096)
+        s.sendall(('*'+command+'#').encode('utf-8'))
+        ret = s.recv(4096).decode('utf-8')
         logger.debug(ret)
         if ret != '?':
             ret = ret[1:-2]
