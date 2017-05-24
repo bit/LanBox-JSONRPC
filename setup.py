@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import distutils.core
+from distutils.core import setup
 
-distutils.core.setup(
+setup(
     name='lanbox',
     version='1.0',
     url='https://github.com/bit/python-lanbox',
@@ -11,7 +11,6 @@ distutils.core.setup(
     author_email='j@mailb.org',
     license='GPL',
     packages=['lanbox'],
-    install_requires=['six>=1.5.2'],
     classifiers=[
         'Operating System :: OS Independent',
         'Programming Language :: Python',

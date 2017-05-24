@@ -1,11 +1,13 @@
-from __future__ import absolute_import
-from __future__ import print_function
-import socket
-import six.moves.configparser
+from __future__ import absolute_import, print_function
+
 import json
 import os
-import six
-from six.moves import range
+import socket
+
+try:
+    string_types = (basestring,)
+except NameError:
+    string_types = (str,)
 
 commandDict = {
     'CommonGetAppID': '00050000',
@@ -206,7 +208,7 @@ class Lanbox():
 
     def _to_hex(self, n, length=2):
         '''Convert int to hex string of set length.'''
-        if isinstance(n, six.string_types):
+        if isinstance(n, string_types):
             try:
                 n = int(n)
             except:
@@ -228,7 +230,7 @@ class Lanbox():
 
     def _from_hex(self, n):
         '''Convert hex string to int. Not designed to return bools.'''
-        if not isinstance(n, six.string_types):
+        if not isinstance(n, string_types):
             raise ValueError  # Probably a typo!
         return int(n, 16)
 
