@@ -114,42 +114,16 @@ commandDict = {
     'DebugGetCuelistUsage': 'DF'
 }
 
-class Scene():
-    '''Functions to recover/record light patterns by name outside the LanBox.'''
-    def __init__(self, config=None):
-        self.config = config
-        if config:
-            try:
-                self.scenes = json.load(open(self.config, 'r'))
-            except:
-                self.scenes = {}
-        else:
-            self.scenes = {}
-
-    def get(self, scene):
-        try:
-            return self.scenes[scene.lower()]
-        except:
-            return {}
-
-    def set(self, scene, lights):
-        self.scenes[scene.lower()] = lights
-        if self.config:
-            with open(self.config, 'w') as fd:
-                json.dump(self.scenes, fd, sort_keys=True, indent=4, separators=(',', ':'))
 
 class Lanbox():
     '''
         LanBox interface
-
-        pass scene='/path/to/scenes.json' to store scenes
     '''
 
-    def __init__(self, host='192.168.1.77', port=777, password='777', scene=None):
+    def __init__(self, host='192.168.1.77', port=777, password='777'):
         self._server = (host, port)
         self._password = password
 
-        self.scene = Scene(scene)
 
     def _connectToLB(self, s=None):
         '''Handler for connecting to the lanbox. Blocking.'''
@@ -1465,33 +1439,3 @@ class Lanbox():
         ret['bytesReserved'] = self._from_hex(response[8:12])
         ret['bytesUsed'] = self._from_hex(response[12:])
         return ret
-
-    def setScene(self, sceneName, lights):
-        '''Store this light list on the middleware. Expects a dict of lights. Returns nothing.'''
-        self.scene.set(sceneName, lights)
-
-    def getScene(self, sceneName):
-        '''Return this named this light list from the middleware. Returns a dict of lights.'''
-        return self.scene.get(sceneName)
-
-    def getScenes(self):
-        '''Return the list of all light scenes from the middleware.'''
-        return list(self.scene.scenes.keys())
-
-    def showScene(self, sceneName, lights={}, layer=1):
-        '''Output this named light list. Can be modified with a list of lights to filter. Returns lights changed.'''
-        scene = self.scene.get(sceneName)
-        if len(lights) > 0:
-            for l in scene.copy():
-                if l not in lights:
-                    del scene[l]
-        return self.setChannels(scene, layer)
-
-    def fadeToScene(self, sceneName, lights={}, time=0.5, cueList=2, layer=1):
-        '''Fade to this named light list. Can be modified with a list of lights to filter. Returns lights changed.'''
-        scene = self.scene.get(sceneName)
-        if len(lights) > 0:
-            for l in scene.copy():
-                if l not in lights:
-                    del scene[l]
-        return self.fadeTo(scene, time, cueList, layer)
